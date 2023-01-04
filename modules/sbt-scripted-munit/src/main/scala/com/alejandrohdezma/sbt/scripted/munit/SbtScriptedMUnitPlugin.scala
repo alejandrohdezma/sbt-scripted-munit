@@ -26,12 +26,12 @@ import sbt.Keys._
 import sbt.Setting
 import sbt.settingKey
 import sbt.taskKey
-import sbt.testing.Event
-import sbt.testing.EventHandler
-import sbt.testing.Status
-import sbt.testing.TaskDef
 
 import munit._
+import org.junit.runner.Description
+import org.junit.runner.notification.Failure
+import org.junit.runner.notification.RunListener
+import org.junit.runner.notification.RunNotifier
 
 object SbtScriptedMUnitPlugin extends AutoPlugin {
 
@@ -66,53 +66,52 @@ object SbtScriptedMUnitPlugin extends AutoPlugin {
   override def projectSettings: Seq[Setting[_]] = Seq(
     munitSuites := Nil,
     munitScripted := {
-      val framework = new Framework
-
       val testsFailed = new AtomicBoolean(false)
 
       val logger = streams.value.log
 
-      val eventHandler: EventHandler = {
-        case event if event.isFailure =>
+      val listener = new RunListener {
+
+        val failed = new ThreadLocal[Boolean]
+
+        override def testFailure(failure: Failure): Unit = {
+          failed.set(true)
           testsFailed.set(true)
-          logger.error(s"  ${Console.RED}==> X ${event.name} ${Console.RESET} ${event.failure.getOrElse("")}")
-        case event if event.isIgnored =>
-          logger.warn(s"  ${Console.YELLOW}==> i ${event.name} ${Console.RESET}")
-        case event =>
-          logger.info(s"  ${Console.GREEN}+ ${event.name} ${Console.RESET}")
+          val name      = failure.getDescription().name
+          val throwable = Option(failure.getException()).flatMap(t => Option(t.getMessage()))
+          logger.error(s"  ${Console.RED}==> X $name ${Console.RESET} ${throwable.getOrElse("")}")
+        }
+
+        override def testIgnored(description: Description): Unit =
+          logger.warn(s"  ${Console.YELLOW}==> i ${description.name} ${Console.RESET}")
+
+        override def testFinished(description: Description): Unit =
+          if (!failed.get)
+            logger.info(s"  ${Console.GREEN}+ ${description.name} ${Console.RESET}")
+
       }
 
-      munitSuites.value.foreach { case (name, suite) =>
-        val runner  = framework.runner(Array("+l"), Array.empty, suite.getClass().getClassLoader())
-        val taskDef = new TaskDef(suite.getClass().getName(), framework.munitFingerprint, false, Array.empty)
-        val tasks   = runner.tasks(Array(taskDef))
+      val notifier = new RunNotifier {}
+      notifier.addListener(listener)
 
+      munitSuites.value.foreach { case (name, suite) =>
         logger.info(s"${Console.GREEN}$name:${Console.RESET}")
-        tasks.foreach(_.execute(eventHandler, Array.empty))
+
+        val runner = new MUnitRunner(suite.getClass(), () => suite)
+        runner.run(notifier)
       }
 
       if (testsFailed.get()) throw TestsFailed // scalafix:ok
     }
   )
 
-  implicit private class EventOps(event: Event) {
+  implicit private class DescriptionOps(description: Description) {
 
-    val failure: Option[String] =
-      if (event.throwable().isDefined) Some(event.throwable().get().toString) // scalafix:ok
-      else None
+    def name = {
+      val displayName = description.getDisplayName()
 
-    val isFailure: Boolean = event.status() match {
-      case Status.Error | Status.Failure | Status.Canceled | Status.Pending => true
-      case _                                                                => false
+      displayName.substring(0, displayName.lastIndexOf("("))
     }
-
-    val isIgnored: Boolean = event.status() match {
-      case Status.Ignored | Status.Skipped => true
-      case _                               => false
-    }
-
-    val name: String =
-      event.fullyQualifiedName().replaceAll(""".*\$\$anon\$\d+\.""", "")
 
   }
 

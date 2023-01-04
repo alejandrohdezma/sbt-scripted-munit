@@ -1,7 +1,7 @@
 munitSuites += "MySuite" -> new FunSuite {
 
   test("This test passes") {
-    assertEquals(true, true)
+    assertEquals(description.value, "simple")
   }
 
   test("This test is ignored".ignore) {
