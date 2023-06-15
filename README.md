@@ -8,7 +8,7 @@ Create a scripted test for your SBT plugin following the
 Add the following line to the `plugins.sbt` file of your scripted test:
 
 ```sbt
-addSbtPlugin("com.alejandrohdezma" % "sbt-scripted-munit" % "0.2.0")
+addSbtPlugin("com.alejandrohdezma" % "sbt-scripted-munit" % "0.2.1")
 ```
 
 Add some tests to `build.sbt`:
