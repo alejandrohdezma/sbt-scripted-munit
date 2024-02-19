@@ -1,10 +1,11 @@
 ThisBuild / scalaVersion                  := _root_.scalafix.sbt.BuildInfo.scala212
 ThisBuild / organization                  := "com.alejandrohdezma"
 ThisBuild / pluginCrossBuild / sbtVersion := "1.2.8"
+ThisBuild / versionPolicyIntention        := Compatibility.BinaryAndSourceCompatible
 
-addCommandAlias("ci-test", "fix --check; mdoc; scripted")
+addCommandAlias("ci-test", "fix --check; versionPolicyCheck; mdoc; scripted")
 addCommandAlias("ci-docs", "github; mdoc; headerCreateAll")
-addCommandAlias("ci-publish", "github; ci-release")
+addCommandAlias("ci-publish", "versionCheck; github; ci-release")
 
 lazy val documentation = project
   .enablePlugins(MdocPlugin)
