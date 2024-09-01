@@ -1,7 +1,7 @@
 ThisBuild / scalaVersion                  := _root_.scalafix.sbt.BuildInfo.scala212
 ThisBuild / organization                  := "com.alejandrohdezma"
 ThisBuild / pluginCrossBuild / sbtVersion := "1.2.8"
-ThisBuild / versionPolicyIntention        := Compatibility.BinaryAndSourceCompatible
+ThisBuild / versionPolicyIntention        := Compatibility.BinaryCompatible
 
 addCommandAlias("ci-test", "fix --check; versionPolicyCheck; mdoc; scripted")
 addCommandAlias("ci-docs", "github; mdoc; headerCreateAll")
@@ -12,7 +12,7 @@ lazy val documentation = project
   .settings(mdocOut := file("."))
 
 lazy val `sbt-scripted-munit` = module
-  .settings(libraryDependencies += "org.scalameta" %% "munit" % "1.0.0")
+  .settings(libraryDependencies += "org.scalameta" %% "munit" % "1.0.1")
   .enablePlugins(SbtPlugin)
   .settings(scriptedBufferLog := false)
   .settings(scriptedLaunchOpts += s"-Dplugin.version=${version.value}")
