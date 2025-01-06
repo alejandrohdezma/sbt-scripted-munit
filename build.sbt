@@ -12,7 +12,7 @@ lazy val documentation = project
   .settings(mdocOut := file("."))
 
 lazy val `sbt-scripted-munit` = module
-  .settings(libraryDependencies += "org.scalameta" %% "munit" % "1.0.2")
+  .settings(libraryDependencies += "org.scalameta" %% "munit" % "1.0.3")
   .enablePlugins(SbtPlugin)
   .settings(scriptedBufferLog := false)
   .settings(scriptedLaunchOpts += s"-Dplugin.version=${version.value}")
