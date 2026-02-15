@@ -64,7 +64,7 @@ object SbtScriptedMUnitPlugin extends AutoPlugin {
   override def trigger = allRequirements
 
   override def projectSettings: Seq[Setting[_]] = Seq(
-    munitSuites := Nil,
+    munitSuites   := Nil,
     munitScripted := {
       val testsFailed = new AtomicBoolean(false)
 
