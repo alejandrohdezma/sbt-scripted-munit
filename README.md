@@ -1,5 +1,7 @@
 SBT plugin to enable using MUnit to test your SBT plugins
 
+Compatible with **sbt 1.x** (Scala 2.12) and **sbt 2.x** (Scala 3).
+
 ## Usage
 
 Create a scripted test for your SBT plugin following the
