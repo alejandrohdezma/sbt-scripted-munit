@@ -23,7 +23,6 @@ import scala.util.control.NoStackTrace
 
 import sbt.AutoPlugin
 import sbt.Keys._
-import sbt.Setting
 import sbt.settingKey
 import sbt.taskKey
 
@@ -53,7 +52,7 @@ object SbtScriptedMUnitPlugin extends AutoPlugin {
       "The list of suites to test as name-suite pairs"
     }
 
-    val munitScripted = taskKey[Unit] {
+    @transient val munitScripted = taskKey[Unit] {
       "Executes the suites in `munitSuites`"
     }
 
@@ -63,7 +62,7 @@ object SbtScriptedMUnitPlugin extends AutoPlugin {
 
   override def trigger = allRequirements
 
-  override def projectSettings: Seq[Setting[_]] = Seq(
+  override def projectSettings = Seq(
     munitSuites   := Nil,
     munitScripted := {
       val testsFailed = new AtomicBoolean(false)
