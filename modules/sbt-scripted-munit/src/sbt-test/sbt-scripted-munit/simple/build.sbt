@@ -1,3 +1,5 @@
+description := "simple"
+
 munitSuites += "MySuite" -> new FunSuite {
 
   test("This test passes") {
